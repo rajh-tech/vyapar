@@ -31,6 +31,7 @@ interface AIMarketingAssistantProps {
   onContentSaved: (content: SavedContent) => void;
   language: Language;
   shopName: string;
+  initialProduct?: Product | null;
 }
 
 export const AIMarketingAssistant: React.FC<AIMarketingAssistantProps> = ({
@@ -38,20 +39,42 @@ export const AIMarketingAssistant: React.FC<AIMarketingAssistantProps> = ({
   onContentSaved,
   language,
   shopName,
+  initialProduct,
 }) => {
   const t = getTranslation(language);
   const resultRef = useRef<HTMLDivElement>(null);
 
   // Form states
-  const [selectedProductId, setSelectedProductId] = useState<string>('');
-  const [productName, setProductName] = useState('');
-  const [category, setCategory] = useState('Sarees & Ethnic');
-  const [price, setPrice] = useState<number | ''>(1999);
-  const [discount, setDiscount] = useState('Flat 30% OFF this week');
+  const [selectedProductId, setSelectedProductId] = useState<string>(initialProduct?.id || '');
+  const [productName, setProductName] = useState(initialProduct?.name || '');
+  const [category, setCategory] = useState(initialProduct?.category || 'Sarees & Ethnic');
+  const [price, setPrice] = useState<number | ''>(initialProduct?.price ?? 1999);
+  const [discount, setDiscount] = useState(
+    initialProduct?.originalPrice && initialProduct.originalPrice > initialProduct.price
+      ? `Flat ${Math.round(((initialProduct.originalPrice - initialProduct.price) / initialProduct.originalPrice) * 100)}% OFF`
+      : 'Flat 30% OFF this week'
+  );
   const [targetAudience, setTargetAudience] = useState('Women looking for festive ethnic wear');
   const [platform, setPlatform] = useState<MarketingPlatform>('Instagram');
   const [contentLanguage, setContentLanguage] = useState<Language>(language);
   const [tone, setTone] = useState<MarketingTone>('Festive');
+
+  // React to initialProduct prop changes
+  React.useEffect(() => {
+    if (initialProduct) {
+      setSelectedProductId(initialProduct.id);
+      setProductName(initialProduct.name);
+      setCategory(initialProduct.category);
+      setPrice(initialProduct.price);
+      if (initialProduct.originalPrice && initialProduct.originalPrice > initialProduct.price) {
+        const discountPercent = Math.round(((initialProduct.originalPrice - initialProduct.price) / initialProduct.originalPrice) * 100);
+        setDiscount(`Flat ${discountPercent}% OFF (MRP ₹${initialProduct.originalPrice})`);
+      }
+      if (initialProduct.description) {
+        setTargetAudience(`Shoppers looking for ${initialProduct.category.toLowerCase()} with premium styling`);
+      }
+    }
+  }, [initialProduct]);
 
   // Generation result states
   const [loading, setLoading] = useState(false);
@@ -146,12 +169,6 @@ export const AIMarketingAssistant: React.FC<AIMarketingAssistantProps> = ({
     } catch (err: any) {
       setError('Failed to save content: ' + err.message);
     }
-  };
-
-  const handleOpenWhatsApp = () => {
-    if (!editableCaption) return;
-    const text = encodeURIComponent(editableCaption);
-    window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
   const platforms: MarketingPlatform[] = ['Instagram', 'WhatsApp', 'Facebook', 'General'];
@@ -490,13 +507,15 @@ export const AIMarketingAssistant: React.FC<AIMarketingAssistantProps> = ({
                   <p className="text-xs font-bold text-white mt-0.5">{result.callToAction}</p>
                 </div>
                 {platform === 'WhatsApp' && (
-                  <button
-                    onClick={handleOpenWhatsApp}
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(editableCaption)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all active:scale-95 cursor-pointer"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>{t.openInWhatsApp}</span>
-                  </button>
+                  </a>
                 )}
               </div>
 

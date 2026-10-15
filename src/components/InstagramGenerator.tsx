@@ -21,25 +21,44 @@ interface InstagramGeneratorProps {
   products: Product[];
   onContentSaved: (content: SavedContent) => void;
   language: Language;
+  initialProduct?: Product | null;
 }
 
 export const InstagramGenerator: React.FC<InstagramGeneratorProps> = ({
   products,
   onContentSaved,
   language,
+  initialProduct,
 }) => {
   const t = getTranslation(language);
   const resultRef = useRef<HTMLDivElement>(null);
 
   // Form states
-  const [selectedProductId, setSelectedProductId] = useState('');
-  const [productName, setProductName] = useState('');
-  const [price, setPrice] = useState<number | ''>(1499);
-  const [description, setDescription] = useState('');
-  const [discount, setDiscount] = useState('Festive 30% OFF');
+  const [selectedProductId, setSelectedProductId] = useState(initialProduct?.id || '');
+  const [productName, setProductName] = useState(initialProduct?.name || '');
+  const [price, setPrice] = useState<number | ''>(initialProduct?.price ?? 1499);
+  const [description, setDescription] = useState(initialProduct?.description || '');
+  const [discount, setDiscount] = useState(
+    initialProduct?.originalPrice && initialProduct.originalPrice > initialProduct.price
+      ? `Flat ₹${initialProduct.originalPrice - initialProduct.price} OFF`
+      : 'Festive 30% OFF'
+  );
   const [targetAudience, setTargetAudience] = useState('Fashion influencers & ethnic wear lovers');
   const [contentLanguage, setContentLanguage] = useState<Language>(language);
   const [captionStyle, setCaptionStyle] = useState<'Trendy' | 'Festive' | 'Minimalist' | 'Storytelling' | 'Offer-Focused'>('Trendy');
+
+  // Sync with initialProduct prop
+  React.useEffect(() => {
+    if (initialProduct) {
+      setSelectedProductId(initialProduct.id);
+      setProductName(initialProduct.name);
+      setPrice(initialProduct.price);
+      setDescription(initialProduct.description || '');
+      if (initialProduct.originalPrice && initialProduct.originalPrice > initialProduct.price) {
+        setDiscount(`Flat ₹${initialProduct.originalPrice - initialProduct.price} OFF (Was ₹${initialProduct.originalPrice})`);
+      }
+    }
+  }, [initialProduct]);
 
   // Result states
   const [loading, setLoading] = useState(false);

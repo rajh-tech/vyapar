@@ -23,6 +23,7 @@ interface WhatsAppGeneratorProps {
   language: Language;
   shopName: string;
   shopPhone?: string;
+  initialProduct?: Product | null;
 }
 
 export const WhatsAppGenerator: React.FC<WhatsAppGeneratorProps> = ({
@@ -31,20 +32,37 @@ export const WhatsAppGenerator: React.FC<WhatsAppGeneratorProps> = ({
   language,
   shopName,
   shopPhone,
+  initialProduct,
 }) => {
   const t = getTranslation(language);
 
   // Form states
-  const [selectedProductId, setSelectedProductId] = useState('');
-  const [productName, setProductName] = useState('');
-  const [price, setPrice] = useState<number | ''>(999);
-  const [discount, setDiscount] = useState('Flat 40% OFF');
+  const [selectedProductId, setSelectedProductId] = useState(initialProduct?.id || '');
+  const [productName, setProductName] = useState(initialProduct?.name || '');
+  const [price, setPrice] = useState<number | ''>(initialProduct?.price ?? 999);
+  const [discount, setDiscount] = useState(
+    initialProduct?.originalPrice && initialProduct.originalPrice > initialProduct.price
+      ? `Special Price (MRP ₹${initialProduct.originalPrice})`
+      : 'Flat 40% OFF'
+  );
   const [expiryDate, setExpiryDate] = useState('This Sunday Midnight');
   const [contentLanguage, setContentLanguage] = useState<Language>(language);
   const [messageStyle, setMessageStyle] = useState<
     'Direct & Urgent' | 'Friendly & Warm' | 'Festive Celebration' | 'VIP Customer Special'
   >('Direct & Urgent');
   const [editableMessage, setEditableMessage] = useState('');
+
+  // React to initialProduct prop changes
+  React.useEffect(() => {
+    if (initialProduct) {
+      setSelectedProductId(initialProduct.id);
+      setProductName(initialProduct.name);
+      setPrice(initialProduct.price);
+      if (initialProduct.originalPrice && initialProduct.originalPrice > initialProduct.price) {
+        setDiscount(`Special Price (MRP ₹${initialProduct.originalPrice})`);
+      }
+    }
+  }, [initialProduct]);
 
   // Results
   const [loading, setLoading] = useState(false);
@@ -123,12 +141,6 @@ export const WhatsAppGenerator: React.FC<WhatsAppGeneratorProps> = ({
     } catch (err: any) {
       setError('Save failed: ' + err.message);
     }
-  };
-
-  const handleOpenWhatsApp = () => {
-    if (!editableMessage) return;
-    const url = `https://wa.me/?text=${encodeURIComponent(editableMessage)}`;
-    window.open(url, '_blank');
   };
 
   const styles: Array<
@@ -403,13 +415,15 @@ export const WhatsAppGenerator: React.FC<WhatsAppGeneratorProps> = ({
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center gap-2.5">
-                <button
-                  onClick={handleOpenWhatsApp}
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(editableMessage)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/30 flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
                   <span>Send via WhatsApp App / Web</span>
-                </button>
+                </a>
                 <button
                   onClick={handleCopy}
                   className="w-full sm:w-auto py-3 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs sm:text-sm border border-slate-700 flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"

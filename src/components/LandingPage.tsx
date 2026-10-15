@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { Language } from '../types';
 import { getTranslation } from '../utils/translations';
+import { InfoModal, InfoModalType } from './InfoModal';
 
 interface LandingPageProps {
   onOpenAuth: (mode: 'login' | 'register') => void;
@@ -29,6 +30,7 @@ interface LandingPageProps {
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, language }) => {
   const t = getTranslation(language);
+  const [infoModalType, setInfoModalType] = React.useState<InfoModalType>(null);
 
   return (
     <div className="bg-slate-950 text-slate-100 min-h-screen">
@@ -593,13 +595,32 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, language }
               </ul>
             </div>
 
-            <div>
               <h4 className="text-white font-semibold mb-3">Legal & Support</h4>
               <ul className="space-y-2">
-                <li className="hover:text-white cursor-pointer">About VyaparAI</li>
-                <li className="hover:text-white cursor-pointer">Contact Support</li>
-                <li className="hover:text-white cursor-pointer">Privacy Policy</li>
-                <li className="hover:text-white cursor-pointer">Terms and Conditions</li>
+                <li
+                  onClick={() => setInfoModalType('about')}
+                  className="hover:text-indigo-400 cursor-pointer transition-colors"
+                >
+                  About VyaparAI
+                </li>
+                <li
+                  onClick={() => setInfoModalType('contact')}
+                  className="hover:text-indigo-400 cursor-pointer transition-colors"
+                >
+                  Contact Support
+                </li>
+                <li
+                  onClick={() => setInfoModalType('privacy')}
+                  className="hover:text-indigo-400 cursor-pointer transition-colors"
+                >
+                  Privacy Policy
+                </li>
+                <li
+                  onClick={() => setInfoModalType('terms')}
+                  className="hover:text-indigo-400 cursor-pointer transition-colors"
+                >
+                  Terms and Conditions
+                </li>
               </ul>
             </div>
           </div>
@@ -610,6 +631,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth, language }
           </div>
         </div>
       </footer>
+
+      {/* Info & Legal Modal */}
+      <InfoModal
+        type={infoModalType}
+        onClose={() => setInfoModalType(null)}
+        language={language}
+      />
     </div>
   );
 };

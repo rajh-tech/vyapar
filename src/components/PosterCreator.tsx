@@ -25,6 +25,7 @@ interface PosterCreatorProps {
   defaultShopName: string;
   defaultPhone?: string;
   defaultAddress?: string;
+  initialProduct?: Product | null;
 }
 
 export const PosterCreator: React.FC<PosterCreatorProps> = ({
@@ -33,6 +34,7 @@ export const PosterCreator: React.FC<PosterCreatorProps> = ({
   defaultShopName,
   defaultPhone,
   defaultAddress,
+  initialProduct,
 }) => {
   const t = getTranslation(language);
   const posterRef = useRef<HTMLDivElement>(null);
@@ -45,19 +47,42 @@ export const PosterCreator: React.FC<PosterCreatorProps> = ({
     'festive_offer' | 'new_arrival' | 'seasonal_sale' | 'clearance' | 'special_discount'
   >('festive_offer');
   const [shopName, setShopName] = useState(defaultShopName || 'Shree Ganesh Fashion Hub');
-  const [productName, setProductName] = useState('Pure Banarasi Silk Zari Saree');
+  const [productName, setProductName] = useState(initialProduct?.name || 'Pure Banarasi Silk Zari Saree');
   const [headline, setHeadline] = useState('GRAND FESTIVE COLLECTION');
   const [subheadline, setSubheadline] = useState('Special Wedding & Festival Edition');
-  const [price, setPrice] = useState<number | ''>(2499);
-  const [originalPrice, setOriginalPrice] = useState<number | ''>(3999);
-  const [discountTag, setDiscountTag] = useState('FLAT 38% OFF');
+  const [price, setPrice] = useState<number | ''>(initialProduct?.price ?? 2499);
+  const [originalPrice, setOriginalPrice] = useState<number | ''>(initialProduct?.originalPrice ?? 3999);
+  const [discountTag, setDiscountTag] = useState(
+    initialProduct?.originalPrice && initialProduct.originalPrice > initialProduct.price
+      ? `FLAT ${Math.round(((initialProduct.originalPrice - initialProduct.price) / initialProduct.originalPrice) * 100)}% OFF`
+      : 'FLAT 38% OFF'
+  );
   const [contactNumber, setContactNumber] = useState(defaultPhone || '+91 98765 43210');
   const [addressOrWebsite, setAddressOrWebsite] = useState(defaultAddress || 'Shop No. 14, Main Market, Jaipur');
   const [imageUrl, setImageUrl] = useState(
-    'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80'
+    initialProduct?.imageUrl ||
+      'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80'
   );
   const [exporting, setExporting] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState('');
+  const [selectedProductId, setSelectedProductId] = useState(initialProduct?.id || '');
+  const [exportNotice, setExportNotice] = useState<string | null>(null);
+
+  // Sync with initialProduct prop
+  React.useEffect(() => {
+    if (initialProduct) {
+      setSelectedProductId(initialProduct.id);
+      setProductName(initialProduct.name);
+      setPrice(initialProduct.price);
+      if (initialProduct.originalPrice) {
+        setOriginalPrice(initialProduct.originalPrice);
+        const percent = Math.round(((initialProduct.originalPrice - initialProduct.price) / initialProduct.originalPrice) * 100);
+        setDiscountTag(`FLAT ${percent}% OFF`);
+      }
+      if (initialProduct.imageUrl) {
+        setImageUrl(initialProduct.imageUrl);
+      }
+    }
+  }, [initialProduct]);
 
   // Handle inventory auto-fill
   const handleProductSelect = (prodId: string) => {
@@ -88,6 +113,7 @@ export const PosterCreator: React.FC<PosterCreatorProps> = ({
   const handleDownload = async () => {
     if (!posterRef.current) return;
     setExporting(true);
+    setExportNotice(null);
 
     try {
       const dataUrl = await toPng(posterRef.current, {
@@ -99,9 +125,11 @@ export const PosterCreator: React.FC<PosterCreatorProps> = ({
       link.download = `VyaparAI-Poster-${productName.replace(/\s+/g, '-').slice(0, 18)}.png`;
       link.href = dataUrl;
       link.click();
+      setExportNotice('Poster downloaded as PNG successfully!');
+      setTimeout(() => setExportNotice(null), 4000);
     } catch (err) {
       console.error('Failed to export poster image:', err);
-      alert('You can also take a quick screenshot of the poster preview!');
+      setExportNotice('Tip: You can also take a quick screenshot of this 1:1 preview to share!');
     } finally {
       setExporting(false);
     }

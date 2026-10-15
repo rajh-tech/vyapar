@@ -10,6 +10,28 @@
       "businessCategory": "Women's & Men's Ethnic Wear",
       "subscriptionPlan": "starter",
       "createdAt": "2026-10-15T04:43:50.176Z"
+    },
+    {
+      "id": "user_f31aa6b724044c47",
+      "fullName": "Pooja Verma",
+      "email": "pooja_1792044694882@boutique.in",
+      "passwordHash": "78a646d21301b72f57216a69eee9b36be37948960281b740c9f24c46ee9676d0306d734aaef784074e0b2dadc559edfb57f005cb04fab616fa506b967cb47a1b",
+      "salt": "ed59d29d5ebae5f4b471aed3ba19b40a",
+      "businessName": "Pooja Boutique",
+      "businessCategory": "Designer Kurti & Suits Studio",
+      "subscriptionPlan": "free",
+      "createdAt": "2026-10-15T06:11:34.999Z"
+    },
+    {
+      "id": "user_b58107cf6440ebc3",
+      "fullName": "Anita Verma",
+      "email": "anita_audit@vyapar.in",
+      "passwordHash": "76c1bd6e2a1ade60f60fbd61bad49e02f170d38b316a22170ea0a93fb3944869b5df93c294cd3b97070647000398dd47172876704ab4629bf815596c635e298c",
+      "salt": "4e1ffd6b9868ad732a17af091cd7dc54",
+      "businessName": "Anita Creations",
+      "businessCategory": "Women's Boutique",
+      "subscriptionPlan": "free",
+      "createdAt": "2026-10-15T06:15:04.062Z"
     }
   ],
   "sessions": [
@@ -22,6 +44,31 @@
       "token": "tok_5d1aeccf730d51c2a2a6d676e7cca1746d31906f228886b7",
       "userId": "user_demo_101",
       "createdAt": "2026-10-15T04:43:50.177Z"
+    },
+    {
+      "token": "tok_cd02cf538e372de340c7c6d11247e2e39e48680760ac898b",
+      "userId": "user_f31aa6b724044c47",
+      "createdAt": "2026-10-15T06:11:34.999Z"
+    },
+    {
+      "token": "tok_14670c50847669161a57540521c5d2f82b9a76861937a3b2",
+      "userId": "user_demo_101",
+      "createdAt": "2026-10-15T06:11:35.034Z"
+    },
+    {
+      "token": "tok_3ab6266c6fe88415d6dc9c80ac06216300d6536926216472",
+      "userId": "user_demo_101",
+      "createdAt": "2026-10-15T06:11:49.897Z"
+    },
+    {
+      "token": "tok_78f3fef0578a6ec3b4aa5372f80814d5067d26aa8c115561",
+      "userId": "user_demo_101",
+      "createdAt": "2026-10-15T06:15:00.048Z"
+    },
+    {
+      "token": "tok_1bd44ff8fc273eb6d51dc74ab04215fafaf2b199c0b9f90f",
+      "userId": "user_b58107cf6440ebc3",
+      "createdAt": "2026-10-15T06:15:04.062Z"
     }
   ],
   "products": [
@@ -185,6 +232,26 @@
       "preferredLanguage": "en",
       "brandPrimaryColor": "#1e1b4b",
       "brandSecondaryColor": "#7c3aed",
+      "lowStockThreshold": 5
+    },
+    "user_f31aa6b724044c47": {
+      "userId": "user_f31aa6b724044c47",
+      "businessName": "Pooja Boutique",
+      "businessCategory": "Designer Kurti & Suits Studio",
+      "ownerName": "Pooja Verma",
+      "preferredLanguage": "en",
+      "brandPrimaryColor": "#0f172a",
+      "brandSecondaryColor": "#6366f1",
+      "lowStockThreshold": 5
+    },
+    "user_b58107cf6440ebc3": {
+      "userId": "user_b58107cf6440ebc3",
+      "businessName": "Anita Creations",
+      "businessCategory": "Women's Boutique",
+      "ownerName": "Anita Verma",
+      "preferredLanguage": "en",
+      "brandPrimaryColor": "#0f172a",
+      "brandSecondaryColor": "#6366f1",
       "lowStockThreshold": 5
     }
   }

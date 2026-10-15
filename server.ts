@@ -641,7 +641,42 @@ app.delete('/api/content/:id', authenticate, (req: AuthenticatedRequest, res: Re
   return res.json({ success: true });
 });
 
-// --- AI MARKETING GENERATION ROUTES (GEMINI 3.8 FLASH) ---
+// --- ROBUST MULTI-MODEL GEMINI GENERATION HELPER ---
+async function generateWithGemini(
+  prompt: string,
+  systemInstruction: string,
+  responseSchema?: any
+): Promise<{ text: string; model: string }> {
+  // Ordered sequence of capable models per gemini-api skill (flash-latest prioritizes active low-latency pool)
+  const candidateModels = ['gemini-flash-latest', 'gemini-3.8-flash', 'gemini-3.1-flash-lite'];
+  let lastError: any = null;
+
+  for (const model of candidateModels) {
+    try {
+      const response = await ai.models.generateContent({
+        model,
+        contents: prompt,
+        config: {
+          systemInstruction,
+          responseMimeType: 'application/json',
+          ...(responseSchema ? { responseSchema } : {}),
+        },
+      });
+
+      if (response && response.text) {
+        return { text: response.text, model };
+      }
+    } catch (err: any) {
+      lastError = err;
+      const status = err?.status || err?.code || '';
+      console.warn(`[VyaparAI] Model ${model} encountered issue (${status}). Trying next candidate...`);
+    }
+  }
+
+  throw lastError || new Error('All candidate Gemini models were temporarily busy.');
+}
+
+// --- AI MARKETING GENERATION ROUTES ---
 
 app.post('/api/ai/marketing', authenticate, async (req: AuthenticatedRequest, res: Response) => {
   const { productName, category, price, discount, targetAudience, platform, language, tone, shopName } = req.body;
@@ -678,17 +713,9 @@ Provide:
 5. hashtags: 6 to 10 trending, relevant Indian fashion hashtags`;
 
   try {
-    const aiResponse = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: prompt,
-      config: {
-        systemInstruction,
-        responseMimeType: 'application/json',
-      },
-    });
-
-    const rawText = aiResponse.text?.trim() || '{}';
-    let parsedData;
+    const aiResult = await generateWithGemini(prompt, systemInstruction);
+    const rawText = aiResult.text.trim();
+    let parsedData: any = {};
     try {
       parsedData = JSON.parse(rawText);
     } catch {
@@ -698,6 +725,7 @@ Provide:
 
     return res.json({
       success: true,
+      modelUsed: aiResult.model,
       data: {
         headline: parsedData.headline || `Exclusive: ${productName}`,
         caption: parsedData.caption || rawText,
@@ -760,21 +788,14 @@ Style: ${effectiveStyle}
 Language: ${isHindi ? 'Hindi' : 'English'}`;
 
   try {
-    const aiResponse = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: prompt,
-      config: {
-        systemInstruction,
-        responseMimeType: 'application/json',
-      },
-    });
-
-    const raw = aiResponse.text?.trim() || '{}';
+    const aiResult = await generateWithGemini(prompt, systemInstruction);
+    const raw = aiResult.text.trim();
     const cleaned = raw.replace(/```json/g, '').replace(/```/g, '').trim();
     const parsed = JSON.parse(cleaned);
 
     return res.json({
       success: true,
+      modelUsed: aiResult.model,
       data: {
         variations: parsed.variations || [],
         hook: parsed.hook || `Stop scrolling! Look at this gorgeous ${productName} 🔥`,
@@ -843,21 +864,14 @@ Phone: ${phone || ''}
 Language: ${isHindi ? 'Hindi' : 'English'}`;
 
   try {
-    const aiResponse = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: prompt,
-      config: {
-        systemInstruction,
-        responseMimeType: 'application/json',
-      },
-    });
-
-    const raw = aiResponse.text?.trim() || '{}';
+    const aiResult = await generateWithGemini(prompt, systemInstruction);
+    const raw = aiResult.text.trim();
     const cleaned = raw.replace(/```json/g, '').replace(/```/g, '').trim();
     const parsed = JSON.parse(cleaned);
 
     return res.json({
       success: true,
+      modelUsed: aiResult.model,
       data: {
         message: parsed.message || raw,
         highlights: parsed.highlights || ['Best Price', 'High Quality', 'Fast Shipping'],

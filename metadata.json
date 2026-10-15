@@ -2,5 +2,7 @@
   "name": "VyaparAI",
   "description": "AI business assistant for small clothing shops and fashion retailers in India. Generate marketing content, create promotional posters, and manage inventory with simple AI tools.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
